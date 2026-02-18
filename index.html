@@ -1,0 +1,3224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbonomics — The School of Arbitrage</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.3/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.3/supabase.min.js"></script>
+<style>
+  :root {
+    --gold: #D4A843;
+    --gold-light: #F0D68A;
+    --gold-glow: rgba(212,168,67,0.4);
+    --green-deep: #0a2e1a;
+    --green-dark: #0d3b22;
+    --green-mid: #1a6b3a;
+    --green-bright: #2ecc71;
+    --green-neon: #00ff88;
+    --green-glow: rgba(0,255,136,0.15);
+    --bg: #050e08;
+    --bg-card: rgba(10,46,26,0.5);
+    --bg-elevated: rgba(13,59,34,0.6);
+    --border: rgba(212,168,67,0.15);
+    --border-green: rgba(0,255,136,0.1);
+    --text: #e8f0eb;
+    --text-dim: #7a9a87;
+    --gradient-gold: linear-gradient(135deg, #D4A843, #F0D68A, #D4A843);
+    --gradient-green: linear-gradient(135deg, #0d3b22, #1a6b3a);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========= GALAXY BACKGROUND ========= */
+  .galaxy-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(0,255,136,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(212,168,67,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(0,80,40,0.08) 0%, transparent 70%);
+  }
+
+  /* Stars */
+  .stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle var(--dur) ease-in-out infinite;
+    opacity: 0;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: var(--max-opacity); }
+  }
+
+  /* Nebula blobs */
+  .nebula {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .nebula-1 {
+    width: 600px; height: 600px;
+    top: -10%; left: -5%;
+    background: rgba(0,100,50,0.12);
+    animation: nebulaDrift 20s ease-in-out infinite;
+  }
+  .nebula-2 {
+    width: 500px; height: 500px;
+    bottom: 10%; right: -5%;
+    background: rgba(212,168,67,0.06);
+    animation: nebulaDrift 25s ease-in-out infinite reverse;
+  }
+  .nebula-3 {
+    width: 400px; height: 400px;
+    top: 40%; left: 50%;
+    background: rgba(0,180,80,0.05);
+    animation: nebulaDrift 18s ease-in-out infinite 5s;
+  }
+
+  @keyframes nebulaDrift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -20px) scale(1.05); }
+    66% { transform: translate(-20px, 30px) scale(0.95); }
+  }
+
+  /* ========= NAV ========= */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    padding: 0.8rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(30px);
+    background: rgba(5,14,8,0.85);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-transform: uppercase;
+  }
+
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
+  }
+  .nav-links a:hover { color: var(--green-neon); text-shadow: 0 0 10px rgba(0,255,136,0.3); }
+
+  .nav-auth {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+  }
+
+  .btn-login {
+    color: var(--gold) !important;
+    border: 1px solid rgba(212,168,67,0.3);
+    padding: 0.45rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .btn-login:hover { background: rgba(212,168,67,0.1); border-color: var(--gold); }
+
+  .btn-signup-nav {
+    background: var(--gradient-gold);
+    color: var(--bg) !important;
+    -webkit-text-fill-color: var(--bg) !important;
+    padding: 0.45rem 1rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-family: 'Rajdhani', sans-serif;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-signup-nav:hover { box-shadow: 0 0 20px var(--gold-glow); transform: translateY(-1px); }
+
+  /* ========= HERO ========= */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8rem 2rem 4rem;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .hero-logo {
+    width: min(320px, 70vw);
+    margin: 0 auto 2rem;
+    animation: floatLogo 6s ease-in-out infinite;
+    filter: drop-shadow(0 0 40px rgba(212,168,67,0.2)) drop-shadow(0 0 80px rgba(0,255,136,0.1));
+  }
+
+  @keyframes floatLogo {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .hero h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .hero h1 .gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero h1 .neon {
+    color: var(--green-neon);
+    text-shadow: 0 0 20px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.2);
+  }
+
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    max-width: 550px;
+    margin: 0 auto 1.5rem;
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  /* Email capture bar */
+  .email-capture {
+    display: flex;
+    max-width: 500px;
+    margin: 0 auto 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: rgba(10,46,26,0.4);
+    backdrop-filter: blur(10px);
+    transition: border-color 0.3s;
+  }
+  .email-capture:focus-within { border-color: var(--gold); box-shadow: 0 0 20px rgba(212,168,67,0.15); }
+
+  .email-capture input {
+    flex: 1;
+    padding: 1rem 1.2rem;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none;
+  }
+  .email-capture input::placeholder { color: var(--text-dim); }
+
+  .email-capture button {
+    padding: 1rem 1.8rem;
+    background: var(--gradient-gold);
+    border: none;
+    color: var(--bg);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .email-capture button:hover { box-shadow: 0 0 20px var(--gold-glow); }
+
+  .hero-or {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: transparent;
+    color: var(--green-neon);
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
+    transition: all 0.3s;
+    border: 1px solid rgba(0,255,136,0.3);
+  }
+  .btn-primary:hover {
+    background: rgba(0,255,136,0.08);
+    border-color: var(--green-neon);
+    box-shadow: 0 0 25px rgba(0,255,136,0.15);
+    transform: translateY(-2px);
+  }
+
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--gradient-gold);
+    color: var(--bg);
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-gold:hover { box-shadow: 0 0 30px var(--gold-glow); transform: translateY(-2px); }
+
+  /* ========= TICKER ========= */
+  .ticker-wrap {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,14,8,0.8);
+    backdrop-filter: blur(10px);
+    padding: 0.8rem 0;
+  }
+
+  .ticker {
+    display: flex;
+    gap: 3rem;
+    animation: scroll 35s linear infinite;
+    white-space: nowrap;
+  }
+
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .ticker-item .sport { color: var(--text-dim); text-transform: uppercase; font-size: 0.65rem; letter-spacing: 1px; }
+  .ticker-item .roi { color: var(--green-neon); font-weight: 700; text-shadow: 0 0 8px rgba(0,255,136,0.3); }
+  .ticker-item .match { color: var(--text); }
+
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ========= SECTIONS ========= */
+  section { position: relative; z-index: 1; padding: 6rem 2rem; }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--green-neon);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 0.8rem;
+    text-shadow: 0 0 10px rgba(0,255,136,0.3);
+  }
+
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .section-sub {
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    max-width: 600px;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  /* ========= STATS ========= */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.2rem;
+    margin-top: 3rem;
+  }
+
+  .stat {
+    text-align: center;
+    padding: 1.8rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    transition: all 0.4s;
+  }
+  .stat:hover { border-color: var(--gold); box-shadow: 0 0 25px rgba(212,168,67,0.1); }
+
+  .stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.3rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* ========= STEPS ========= */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.4s;
+    position: relative;
+    overflow: hidden;
+  }
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green-neon), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .step:hover { border-color: rgba(0,255,136,0.3); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+  .step:hover::before { opacity: 1; }
+
+  .step-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--green-neon);
+    letter-spacing: 3px;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 8px rgba(0,255,136,0.3);
+  }
+
+  .step-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+
+  .step h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .step p { color: var(--text-dim); font-size: 0.95rem; line-height: 1.6; }
+
+  /* ========= ARB PREVIEW ========= */
+  .arb-preview {
+    margin-top: 3rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .arb-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .arb-header-left { display: flex; align-items: center; gap: 0.7rem; }
+
+  .arb-dot {
+    width: 8px; height: 8px;
+    background: var(--green-neon);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 8px rgba(0,255,136,0.5);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.5); }
+  }
+
+  .arb-header-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .arb-header-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    font-weight: 700;
+  }
+
+  .arb-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 80px;
+    align-items: center;
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    font-size: 0.88rem;
+    transition: background 0.2s;
+  }
+  .arb-row:hover { background: rgba(0,255,136,0.03); }
+
+  .arb-sport {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  .arb-match { font-weight: 600; }
+  .arb-market { color: var(--text-dim); font-weight: 400; font-size: 0.82rem; }
+  .arb-roi {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--green-neon);
+    text-align: right;
+    text-shadow: 0 0 8px rgba(0,255,136,0.3);
+  }
+
+  .arb-blur { position: relative; }
+  .arb-blur .arb-row { filter: blur(5px); user-select: none; }
+  .arb-blur-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    background: rgba(5,14,8,0.7);
+    backdrop-filter: blur(3px);
+    z-index: 2;
+  }
+  .arb-blur-overlay p {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ========= PREMIUM SECTION ========= */
+  .premium-section {
+    background: linear-gradient(180deg, rgba(10,46,26,0.3) 0%, rgba(5,14,8,0.5) 100%);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .pricing-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    backdrop-filter: blur(10px);
+    position: relative;
+    transition: all 0.4s;
+  }
+  .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+
+  .pricing-card.featured {
+    border-color: var(--gold);
+    box-shadow: 0 0 40px rgba(212,168,67,0.08), inset 0 0 40px rgba(212,168,67,0.02);
+  }
+  .pricing-card.featured::before {
+    content: 'MOST POPULAR';
+    position: absolute;
+    top: -12px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--gradient-gold);
+    color: var(--bg);
+    padding: 0.3rem 1.2rem;
+    border-radius: 100px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .plan-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 0.5rem;
+  }
+
+  .plan-price {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 0.3rem;
+  }
+  .plan-price span { font-size: 0.9rem; font-weight: 400; color: var(--text-dim); }
+
+  .plan-desc { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  .plan-features { list-style: none; margin-bottom: 2rem; }
+  .plan-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .plan-features li:last-child { border-bottom: none; }
+  .plan-features .check { color: var(--green-neon); font-weight: 700; text-shadow: 0 0 6px rgba(0,255,136,0.3); }
+
+  .btn-plan {
+    display: block;
+    width: 100%;
+    padding: 0.9rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .btn-plan:hover { border-color: var(--green-neon); color: var(--green-neon); }
+
+  .btn-plan.gold {
+    background: var(--gradient-gold);
+    color: var(--bg);
+    border: none;
+  }
+  .btn-plan.gold:hover { box-shadow: 0 0 25px var(--gold-glow); }
+
+  /* ========= REVIEWS ========= */
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .review-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+  }
+  .review-card:hover { border-color: rgba(0,255,136,0.2); }
+
+  .review-stars { color: var(--gold); font-size: 1rem; margin-bottom: 0.8rem; letter-spacing: 2px; }
+
+  .review-text {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 1rem;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .review-author { font-weight: 700; color: var(--gold); font-size: 0.9rem; }
+  .review-date { font-size: 0.8rem; color: var(--text-dim); }
+
+  /* Write review form */
+  .review-form {
+    margin-top: 2.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .review-form h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .form-row { margin-bottom: 1rem; }
+  .form-row label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: rgba(5,14,8,0.6);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.3s;
+    resize: vertical;
+  }
+  .form-input:focus { border-color: var(--green-neon); box-shadow: 0 0 10px rgba(0,255,136,0.1); }
+  .form-input::placeholder { color: var(--text-dim); }
+
+  .star-rating { display: flex; gap: 0.3rem; margin-bottom: 0.5rem; }
+  .star-rating span {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--border);
+    transition: all 0.2s;
+  }
+  .star-rating span.active,
+  .star-rating span:hover { color: var(--gold); text-shadow: 0 0 8px var(--gold-glow); }
+
+  /* ========= AUTH MODALS ========= */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(5,14,8,0.9);
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 60px rgba(0,0,0,0.5), 0 0 30px rgba(212,168,67,0.05);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1.2rem;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal .subtitle {
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+
+  .modal .form-row { margin-bottom: 1.2rem; }
+
+  .modal .btn-gold {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .modal-switch {
+    text-align: center;
+    margin-top: 1.2rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+  .modal-switch a {
+    color: var(--green-neon);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .modal-switch a:hover { text-shadow: 0 0 8px rgba(0,255,136,0.3); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .social-login {
+    display: flex;
+    gap: 0.8rem;
+  }
+  .social-btn {
+    flex: 1;
+    padding: 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  .social-btn:hover { border-color: var(--gold); background: rgba(212,168,67,0.05); }
+
+  /* ========= FAQ ========= */
+  .faq-list { margin-top: 3rem; max-width: 700px; }
+  .faq-item { border-bottom: 1px solid var(--border); padding: 1.3rem 0; }
+
+  .faq-q {
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .faq-q:hover { color: var(--green-neon); }
+  .faq-q .arrow { transition: transform 0.3s; font-size: 1.2rem; color: var(--text-dim); }
+  .faq-item.open .arrow { transform: rotate(45deg); color: var(--green-neon); }
+
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  .faq-item.open .faq-a { max-height: 200px; padding-top: 1rem; }
+
+  /* ========= FINAL CTA ========= */
+  .final-cta {
+    text-align: center;
+    padding: 8rem 2rem;
+    position: relative;
+  }
+
+  .final-cta h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .final-cta p { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 2.5rem; }
+
+  /* ========= FOOTER ========= */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  footer a { color: var(--gold); text-decoration: none; }
+
+  /* ========= ANIMATIONS ========= */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ========= SUCCESS NOTIFICATION ========= */
+  .notification {
+    display: none;
+    position: fixed;
+    top: 5rem; right: 2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--green-neon);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    z-index: 3000;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 20px rgba(0,255,136,0.15);
+    animation: slideIn 0.5s ease;
+    max-width: 350px;
+  }
+  .notification.active { display: flex; align-items: center; gap: 0.8rem; }
+  .notification .notif-icon { font-size: 1.3rem; }
+  .notification .notif-text { font-size: 0.9rem; font-weight: 600; }
+
+  @keyframes slideIn {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* ========= MOBILE ========= */
+  @media (max-width: 768px) {
+    nav { padding: 0.7rem 1rem; }
+    .nav-links { display: none; }
+    .nav-auth { gap: 0.5rem; }
+    .hero { padding: 7rem 1.5rem 3rem; }
+    .hero-logo { width: min(260px, 80vw); }
+    section { padding: 4rem 1.5rem; }
+    .arb-row { grid-template-columns: 60px 1fr 70px; }
+    .arb-market { display: none; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .email-capture { flex-direction: column; }
+    .email-capture button { padding: 0.9rem; }
+    .hero-buttons { flex-direction: column; align-items: center; }
+    .btn-primary, .btn-gold { width: 100%; justify-content: center; }
+    .modal { padding: 2rem 1.5rem; }
+    .social-login { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- GALAXY BG -->
+<div class="galaxy-bg"></div>
+<div class="stars" id="stars"></div>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification">
+  <span class="notif-icon">✅</span>
+  <span class="notif-text" id="notif-text">Account created successfully!</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Arbonomics</div>
+  <div class="nav-links">
+    <a href="#how">How It Works</a>
+    <a href="#premium">Premium</a>
+    <a href="#reviews">Reviews</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <div class="nav-auth" id="navGuest">
+    <button class="btn-login" onclick="openModal('login')">Log In</button>
+    <button class="btn-signup-nav" onclick="openModal('signup')">Sign Up</button>
+  </div>
+  <div class="nav-user" id="navUser">
+    <span class="nav-user-email" id="navUserEmail"></span>
+    <button class="btn-logout" onclick="handleLogout()">Log Out</button>
+  </div>
+</nav>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('login')">&times;</button>
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Log in to your Arbonomics dashboard</p>
+    <div class="form-row">
+      <label>Email</label>
+      <input type="email" class="form-input" placeholder="you@email.com">
+    </div>
+    <div class="form-row">
+      <label>Password</label>
+      <input type="password" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="form-error" id="loginError"></div>
+    <button class="btn-gold" id="loginBtn" onclick="handleLogin()" style="width:100%;justify-content:center;">Log In</button>
+    <div class="divider">or</div>
+    <div class="social-login">
+      <button class="social-btn">Google</button>
+      <button class="social-btn">Telegram</button>
+    </div>
+    <div class="modal-switch">
+      Don't have an account? <a onclick="switchModal('signup')">Sign up</a>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP MODAL -->
+<div class="modal-overlay" id="signupModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('signup')">&times;</button>
+    <h2>Create Account</h2>
+    <p class="subtitle">Join the school of arbitrage</p>
+    <div class="form-row">
+      <label>Email</label>
+      <input type="email" class="form-input" placeholder="you@email.com" id="signupEmail">
+    </div>
+    <div class="form-row">
+      <label>Username</label>
+      <input type="text" class="form-input" placeholder="Choose a username">
+    </div>
+    <div class="form-row">
+      <label>Password</label>
+      <input type="password" class="form-input" placeholder="Min. 8 characters">
+    </div>
+    <div class="form-row">
+      <label>Confirm Password</label>
+      <input type="password" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="form-error" id="signupError"></div>
+    <button class="btn-gold" id="signupBtn" onclick="handleSignup()" style="width:100%;justify-content:center;">Create Account</button>
+    <div class="divider">or</div>
+    <div class="social-login">
+      <button class="social-btn">Google</button>
+      <button class="social-btn">Telegram</button>
+    </div>
+    <div class="modal-switch">
+      Already have an account? <a onclick="switchModal('login')">Log in</a>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <img src="logo.png" alt="Arbonomics" class="hero-logo">
+    <h1>The School of<br><span class="neon">Arbitrage</span></h1>
+    <p class="hero-sub">Real-time arbitrage alerts powered by the Odyssey engine. Join a growing community making guaranteed profit from bookmaker inefficiencies.</p>
+
+    <div class="email-capture" id="heroEmail">
+      <input type="email" placeholder="Enter your email to get started..." id="heroEmailInput">
+      <button onclick="handleHeroEmail()">Get Started</button>
+    </div>
+
+    <div class="hero-or">— or join directly —</div>
+
+    <div class="hero-buttons">
+      <a href="https://t.me/YOUR_TELEGRAM_LINK" class="btn-primary" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.13l-1.97 9.27c-.15.67-.54.83-1.09.52l-3.01-2.22-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.05 5.55-5.01c.24-.21-.05-.33-.37-.13l-6.86 4.32-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1-.05.85.93z"/></svg>
+        Join Telegram — Free
+      </a>
+      <a href="#premium" class="btn-gold">
+        View Premium Plans
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-item"><span class="sport">⚽ EPL</span><span class="match">Arsenal vs Chelsea</span><span class="roi">+3.2%</span></div>
+    <div class="ticker-item"><span class="sport">🏀 NBA</span><span class="match">Lakers vs Celtics</span><span class="roi">+2.8%</span></div>
+    <div class="ticker-item"><span class="sport">🎾 ATP</span><span class="match">Djokovic vs Sinner</span><span class="roi">+4.1%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ Liga</span><span class="match">Real Madrid vs Barça</span><span class="roi">+2.5%</span></div>
+    <div class="ticker-item"><span class="sport">🏈 NFL</span><span class="match">Chiefs vs Eagles</span><span class="roi">+3.7%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ BL</span><span class="match">Bayern vs Dortmund</span><span class="roi">+2.1%</span></div>
+    <div class="ticker-item"><span class="sport">🏀 NBA</span><span class="match">Nuggets vs Bucks</span><span class="roi">+3.5%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ EPL</span><span class="match">City vs Liverpool</span><span class="roi">+4.4%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ EPL</span><span class="match">Arsenal vs Chelsea</span><span class="roi">+3.2%</span></div>
+    <div class="ticker-item"><span class="sport">🏀 NBA</span><span class="match">Lakers vs Celtics</span><span class="roi">+2.8%</span></div>
+    <div class="ticker-item"><span class="sport">🎾 ATP</span><span class="match">Djokovic vs Sinner</span><span class="roi">+4.1%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ Liga</span><span class="match">Real Madrid vs Barça</span><span class="roi">+2.5%</span></div>
+    <div class="ticker-item"><span class="sport">🏈 NFL</span><span class="match">Chiefs vs Eagles</span><span class="roi">+3.7%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ BL</span><span class="match">Bayern vs Dortmund</span><span class="roi">+2.1%</span></div>
+    <div class="ticker-item"><span class="sport">🏀 NBA</span><span class="match">Nuggets vs Bucks</span><span class="roi">+3.5%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ EPL</span><span class="match">City vs Liverpool</span><span class="roi">+4.4%</span></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<section class="container fade-in">
+  <div class="stats">
+    <div class="stat"><div class="stat-value">130+</div><div class="stat-label">Members</div></div>
+    <div class="stat"><div class="stat-value">50+</div><div class="stat-label">Daily Arbs</div></div>
+    <div class="stat"><div class="stat-value">30</div><div class="stat-label">Bookmakers</div></div>
+    <div class="stat"><div class="stat-value">24/7</div><div class="stat-label">Odyssey Bot</div></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="container fade-in">
+  <div class="section-label">/// How It Works</div>
+  <div class="section-title">Three steps to<br>guaranteed profit</div>
+  <div class="section-sub">Arbitrage betting exploits price differences between bookmakers. When odds don't agree, you profit regardless of outcome.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-icon">📡</div>
+      <div class="step-number">// Step 01</div>
+      <h3>Odyssey Scans</h3>
+      <p>Our Odyssey V37 engine monitors odds across 30 bookmakers in real-time, scanning for profitable discrepancies around the clock.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon">⚡</div>
+      <div class="step-number">// Step 02</div>
+      <h3>Instant Alert</h3>
+      <p>Receive Telegram alerts with exact bets, stakes, and bookmakers. Everything pre-calculated — just place the bets.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon">💰</div>
+      <div class="step-number">// Step 03</div>
+      <h3>Lock Profit</h3>
+      <p>Both sides covered. No matter who wins, you profit. Typical returns range from 1-5% per arb, risk-free.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE PREVIEW -->
+<section class="container fade-in">
+  <div class="section-label">/// Live Feed</div>
+  <div class="section-title">See what's running now</div>
+  <div class="section-sub">Real opportunities from Odyssey, flowing right now.</div>
+
+  <div class="arb-preview">
+    <div class="arb-header">
+      <div class="arb-header-left">
+        <div class="arb-dot"></div>
+        <span class="arb-header-title">Odyssey Live Feed</span>
+      </div>
+      <span class="arb-header-badge">V37 ACTIVE</span>
+    </div>
+    <div class="arb-row">
+      <span class="arb-sport">⚽ EPL</span>
+      <span class="arb-match">Arsenal vs Man Utd</span>
+      <span class="arb-market">Match Result — Bet365 / Pinnacle</span>
+      <span class="arb-roi">+3.4%</span>
+    </div>
+    <div class="arb-row">
+      <span class="arb-sport">🏀 NBA</span>
+      <span class="arb-match">Knicks vs Heat</span>
+      <span class="arb-market">Over/Under 215.5 — William Hill / Betfair</span>
+      <span class="arb-roi">+2.7%</span>
+    </div>
+    <div class="arb-row">
+      <span class="arb-sport">🎾 ATP</span>
+      <span class="arb-match">Alcaraz vs Medvedev</span>
+      <span class="arb-market">Match Winner — Betway / Smarkets</span>
+      <span class="arb-roi">+4.1%</span>
+    </div>
+    <div class="arb-blur">
+      <div class="arb-row">
+        <span class="arb-sport">⚽ BL</span>
+        <span class="arb-match">Bayern vs Dortmund</span>
+        <span class="arb-market">BTTS — 1xBet / Betfair</span>
+        <span class="arb-roi">+5.2%</span>
+      </div>
+      <div class="arb-row">
+        <span class="arb-sport">🏈 NFL</span>
+        <span class="arb-match">Bills vs Ravens</span>
+        <span class="arb-market">Spread -3.5 — DraftKings / FanDuel</span>
+        <span class="arb-roi">+3.8%</span>
+      </div>
+      <div class="arb-row">
+        <span class="arb-sport">⚽ EPL</span>
+        <span class="arb-match">Liverpool vs Spurs</span>
+        <span class="arb-market">BTTS — Bet365 / Paddy Power</span>
+        <span class="arb-roi">+6.1%</span>
+      </div>
+      <div class="arb-blur-overlay">
+        <p>🔒 Unlock full feed</p>
+        <button class="btn-gold" onclick="openModal('signup')" style="font-size:0.85rem; padding:0.7rem 1.5rem;">Sign Up Free</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PREMIUM -->
+<section id="premium" class="premium-section fade-in">
+  <div class="container">
+    <div class="section-label">/// Premium</div>
+    <div class="section-title">Custom filtered arbs.<br>Your rules.</div>
+    <div class="section-sub">Get a personal Odyssey feed tailored to your bookmakers, sports, and ROI thresholds.</div>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="plan-name">Community</div>
+        <div class="plan-price">Free</div>
+        <div class="plan-desc">Get started with arbing</div>
+        <ul class="plan-features">
+          <li><span class="check">✦</span> Telegram group access</li>
+          <li><span class="check">✦</span> General arb alerts</li>
+          <li><span class="check">✦</span> Community chat</li>
+          <li><span class="check">✦</span> Education resources</li>
+          <li><span class="check">✦</span> Arb calculator</li>
+        </ul>
+        <a href="https://t.me/YOUR_TELEGRAM_LINK" class="btn-plan" target="_blank">Join Free</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">£XX <span>/ month</span></div>
+        <div class="plan-desc">Filtered & personalised</div>
+        <ul class="plan-features">
+          <li><span class="check">✦</span> Everything in Community</li>
+          <li><span class="check">✦</span> Custom sport filters</li>
+          <li><span class="check">✦</span> ROI thresholds</li>
+          <li><span class="check">✦</span> Bookmaker-specific alerts</li>
+          <li><span class="check">✦</span> Priority speed</li>
+          <li><span class="check">✦</span> In-play arbs</li>
+        </ul>
+        <button class="btn-plan gold" onclick="openModal('signup')">Get Pro Access</button>
+      </div>
+
+      <div class="pricing-card">
+        <div class="plan-name">Elite</div>
+        <div class="plan-price">£XX <span>/ month</span></div>
+        <div class="plan-desc">Full platform + dashboard</div>
+        <ul class="plan-features">
+          <li><span class="check">✦</span> Everything in Pro</li>
+          <li><span class="check">✦</span> Web dashboard</li>
+          <li><span class="check">✦</span> Profit tracking</li>
+          <li><span class="check">✦</span> API access</li>
+          <li><span class="check">✦</span> 1-on-1 coaching</li>
+          <li><span class="check">✦</span> Early feature access</li>
+        </ul>
+        <button class="btn-plan" onclick="openModal('signup')">Get Elite Access</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews" class="container fade-in">
+  <div class="section-label">/// Reviews</div>
+  <div class="section-title">From the community</div>
+  <div class="section-sub">Hear from members making real profit with Arbonomics.</div>
+
+  <div class="reviews-grid" id="reviewsGrid">
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"Made my first arb profit within 20 minutes of joining. The alerts are fast and the community is genuinely helpful."</div>
+      <div class="review-author">@member1</div>
+      <div class="review-date">2 weeks ago</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"Odyssey catches arbs I'd never find manually. The Pro filter means I only see opportunities on my bookmakers."</div>
+      <div class="review-author">@member2</div>
+      <div class="review-date">1 week ago</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"Best arb community out there. No fluff, no tipster garbage — pure mathematical edge. Odyssey is elite."</div>
+      <div class="review-author">@member3</div>
+      <div class="review-date">3 days ago</div>
+    </div>
+  </div>
+
+  <!-- Write Review -->
+  <div class="review-form">
+    <h3>✍️ Write a Review</h3>
+    <div class="form-row">
+      <label>Your Rating</label>
+      <div class="star-rating" id="starRating">
+        <span onclick="setRating(1)">★</span>
+        <span onclick="setRating(2)">★</span>
+        <span onclick="setRating(3)">★</span>
+        <span onclick="setRating(4)">★</span>
+        <span onclick="setRating(5)">★</span>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Display Name</label>
+      <input type="text" class="form-input" placeholder="@yourusername" id="reviewName">
+    </div>
+    <div class="form-row">
+      <label>Your Review</label>
+      <textarea class="form-input" rows="3" placeholder="Share your experience with Arbonomics..." id="reviewText"></textarea>
+    </div>
+    <div class="form-error" id="reviewError"></div>
+    <button class="btn-gold" id="reviewBtn" onclick="submitReview()" style="width:100%; justify-content:center; margin-top:0.5rem;">Submit Review</button>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="container fade-in">
+  <div class="section-label">/// FAQ</div>
+  <div class="section-title">Common Questions</div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What is arbitrage betting?<span class="arrow">+</span></div>
+      <div class="faq-a">Arbitrage betting is a strategy where you place bets on all possible outcomes across different bookmakers, exploiting odds discrepancies to guarantee profit regardless of result. It's mathematics, not gambling.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Is this legal?<span class="arrow">+</span></div>
+      <div class="faq-a">Yes, completely legal. You're placing bets at the best available odds. Some bookmakers may limit heavy arbers — our community helps you navigate account longevity strategies.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How much can I make?<span class="arrow">+</span></div>
+      <div class="faq-a">Returns depend on your bankroll and activity. Individual arbs return 1-5% profit. Active members following alerts consistently see steady daily returns. It's not get-rich-quick — it's guaranteed, steady profit.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What's the difference between free and premium?<span class="arrow">+</span></div>
+      <div class="faq-a">The free Telegram gives general arb alerts and community access. Premium gives you a custom Odyssey feed — choose your sports, bookmakers, and minimum ROI threshold so you only see arbs relevant to you.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Do I need a big bankroll?<span class="arrow">+</span></div>
+      <div class="faq-a">No. Start with as little as £50-100 across a couple of bookmakers. The percentage return is the same regardless of stake size.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta fade-in">
+  <h2>Stop gambling.<br>Start <span style="background:var(--gradient-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">profiting.</span></h2>
+  <p>Join 130+ members locking in guaranteed returns every day.</p>
+  <div class="email-capture" style="max-width:500px;margin:0 auto 1.5rem;">
+    <input type="email" placeholder="Enter your email..." id="finalEmailInput">
+    <button onclick="handleFinalEmail()">Join Now</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;background:var(--gradient-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:3px;">ARBONOMICS</p>
+  <p style="margin-top:0.5rem;">The School of Arbitrage — © 2025</p>
+  <p style="margin-top:0.3rem;"><a href="/cdn-cgi/l/email-protection#265f49535466434b474f4a0845494b">Contact</a> · <a href="#">Terms</a> · <a href="#">Privacy</a></p>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ==========================================
+// SUPABASE INIT
+// ==========================================
+const SUPABASE_URL = 'https://dahrptgdmcxqisytftwa.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_K_OyHk9AfTvLhmCItntc0w_WLEmXZV6';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let currentUser = null;
+
+// ==========================================
+// STARS
+// ==========================================
+const starsContainer = document.getElementById('stars');
+for (let i = 0; i < 200; i++) {
+  const star = document.createElement('div');
+  star.className = 'star';
+  star.style.left = Math.random() * 100 + '%';
+  star.style.top = Math.random() * 100 + '%';
+  star.style.setProperty('--dur', (2 + Math.random() * 5) + 's');
+  star.style.setProperty('--max-opacity', (0.3 + Math.random() * 0.7));
+  star.style.animationDelay = Math.random() * 5 + 's';
+  star.style.width = star.style.height = (1 + Math.random() * 2) + 'px';
+  starsContainer.appendChild(star);
+}
+
+// ==========================================
+// SCROLL ANIMATIONS
+// ==========================================
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// ==========================================
+// MODALS
+// ==========================================
+function openModal(type) {
+  closeModal('login'); closeModal('signup');
+  document.getElementById(type + 'Modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  document.querySelectorAll('.form-error').forEach(e => { e.textContent = ''; e.classList.remove('visible'); });
+}
+function closeModal(type) {
+  document.getElementById(type + 'Modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+function switchModal(to) {
+  closeModal(to === 'signup' ? 'login' : 'signup');
+  openModal(to);
+}
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) { overlay.classList.remove('active'); document.body.style.overflow = ''; }
+  });
+});
+
+// ==========================================
+// AUTH: SIGNUP (REAL SUPABASE)
+// ==========================================
+async function handleSignup() {
+  const email = document.getElementById('signupEmail').value.trim();
+  const name = document.getElementById('signupName').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('signupConfirm').value;
+  const errEl = document.getElementById('signupError');
+  const btn = document.getElementById('signupBtn');
+  errEl.classList.remove('visible');
+  if (!email || !password) { showFormError(errEl, 'Email and password are required.'); return; }
+  if (password.length < 6) { showFormError(errEl, 'Password must be at least 6 characters.'); return; }
+  if (password !== confirm) { showFormError(errEl, 'Passwords do not match.'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  const { data, error } = await supabase.auth.signUp({
+    email, password,
+    options: { data: { display_name: name || email.split('@')[0] } }
+  });
+  btn.disabled = false; btn.textContent = 'Create Account';
+  if (error) { showFormError(errEl, error.message); return; }
+  closeModal('signup');
+  if (data.user && !data.session) {
+    showNotif('📧 Check your email to confirm your account!');
+  } else {
+    currentUser = data.user; updateUI();
+    showNotif('✅ Account created! Welcome to Arbonomics.');
+  }
+}
+
+// ==========================================
+// AUTH: LOGIN (REAL SUPABASE)
+// ==========================================
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  errEl.classList.remove('visible');
+  if (!email || !password) { showFormError(errEl, 'Email and password are required.'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Log In';
+  if (error) { showFormError(errEl, error.message); return; }
+  currentUser = data.user;
+  closeModal('login'); updateUI();
+  showNotif('✅ Logged in! Welcome back.');
+}
+
+// ==========================================
+// AUTH: LOGOUT
+// ==========================================
+async function handleLogout() {
+  await supabase.auth.signOut();
+  currentUser = null; updateUI();
+  showNotif('👋 Logged out.');
+}
+
+// ==========================================
+// AUTH: SESSION CHECK
+// ==========================================
+async function checkSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) { currentUser = session.user; updateUI(); }
+  loadReviews();
+}
+supabase.auth.onAuthStateChange((event, session) => {
+  currentUser = session?.user || null; updateUI();
+});
+
+// ==========================================
+// UI UPDATE
+// ==========================================
+function updateUI() {
+  const guest = document.getElementById('navGuest');
+  const user = document.getElementById('navUser');
+  const emailEl = document.getElementById('navUserEmail');
+  if (currentUser) {
+    guest.style.display = 'none'; user.classList.add('active');
+    emailEl.textContent = currentUser.user_metadata?.display_name || currentUser.email;
+  } else {
+    guest.style.display = 'flex'; user.classList.remove('active');
+  }
+  renderReviewForm();
+}
+
+// ==========================================
+// REVIEWS: LOAD FROM SUPABASE
+// ==========================================
+async function loadReviews() {
+  const grid = document.getElementById('reviewsGrid');
+  const { data, error } = await supabase.from('reviews').select('*').order('created_at', { ascending: false }).limit(20);
+  if (error || !data || data.length === 0) {
+    grid.innerHTML = '<div class="reviews-empty">No reviews yet. Be the first!</div>';
+    return;
+  }
+  grid.innerHTML = data.map(r => 
+    '<div class="review-card"><div class="review-stars">' + '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating) + '</div><div class="review-text">"' + escapeHtml(r.review_text) + '"</div><div class="review-author">' + escapeHtml(r.display_name) + '</div><div class="review-date">' + timeAgo(r.created_at) + '</div></div>'
+  ).join('');
+}
+
+// ==========================================
+// REVIEWS: RENDER FORM (login-gated)
+// ==========================================
+function renderReviewForm() {
+  const nameInput = document.getElementById('reviewName');
+  const reviewBtn = document.getElementById('reviewBtn');
+  const reviewError = document.getElementById('reviewError');
+  if (!currentUser) {
+    // Hide the form inputs, show login prompt
+    const form = document.querySelector('.review-form');
+    if (form && !document.getElementById('reviewLoginPrompt')) {
+      const prompt = document.createElement('div');
+      prompt.id = 'reviewLoginPrompt';
+      prompt.className = 'review-login-prompt';
+      prompt.innerHTML = '<a onclick="openModal(\'login\')">Log in</a> or <a onclick="openModal(\'signup\')">sign up</a> to write a review.';
+      // Hide form fields
+      document.querySelectorAll('.review-form .form-row, .review-form .btn-gold, .review-form .form-error').forEach(el => el.style.display = 'none');
+      form.appendChild(prompt);
+    }
+  } else {
+    // Show form fields, remove login prompt
+    const prompt = document.getElementById('reviewLoginPrompt');
+    if (prompt) prompt.remove();
+    document.querySelectorAll('.review-form .form-row, .review-form .btn-gold').forEach(el => el.style.display = '');
+    if (nameInput && !nameInput.value) {
+      nameInput.value = currentUser.user_metadata?.display_name || currentUser.email.split('@')[0];
+    }
+  }
+}
+
+// ==========================================
+// REVIEWS: SUBMIT TO SUPABASE
+// ==========================================
+let currentRating = 5;
+function setRating(n) {
+  currentRating = n;
+  document.querySelectorAll('#starRating span').forEach((s, i) => s.classList.toggle('active', i < n));
+}
+
+async function submitReview() {
+  if (!currentUser) { openModal('login'); return; }
+  const name = document.getElementById('reviewName').value.trim();
+  const text = document.getElementById('reviewText').value.trim();
+  const errEl = document.getElementById('reviewError');
+  const btn = document.getElementById('reviewBtn');
+  if (!text) { showFormError(errEl, 'Please write a review.'); return; }
+  if (text.length < 10) { showFormError(errEl, 'Review must be at least 10 characters.'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  const { error } = await supabase.from('reviews').insert({
+    user_id: currentUser.id,
+    display_name: name || currentUser.email.split('@')[0],
+    rating: currentRating,
+    review_text: text
+  });
+  btn.disabled = false; btn.textContent = 'Submit Review';
+  if (error) { showFormError(errEl, 'Failed: ' + error.message); return; }
+  showNotif('⭐ Review submitted!');
+  document.getElementById('reviewText').value = '';
+  setRating(5);
+  loadReviews();
+}
+
+// ==========================================
+// EMAIL CAPTURE
+// ==========================================
+function handleHeroEmail() {
+  const email = document.getElementById('heroEmailInput').value;
+  if (email && email.includes('@')) { document.getElementById('signupEmail').value = email; openModal('signup'); }
+}
+function handleFinalEmail() {
+  const email = document.getElementById('finalEmailInput').value;
+  if (email && email.includes('@')) { document.getElementById('signupEmail').value = email; openModal('signup'); }
+}
+
+// ==========================================
+// HELPERS
+// ==========================================
+function showFormError(el, msg) { el.textContent = msg; el.classList.add('visible'); }
+function showNotif(msg) {
+  const n = document.getElementById('notification');
+  document.getElementById('notif-text').textContent = msg;
+  n.classList.add('active');
+  setTimeout(() => n.classList.remove('active'), 4000);
+}
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function timeAgo(ds) {
+  const s = Math.floor((Date.now() - new Date(ds)) / 1000);
+  if (s < 60) return 'Just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  if (s < 604800) return Math.floor(s/86400) + 'd ago';
+  return new Date(ds).toLocaleDateString();
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// Init star rating
+document.addEventListener('DOMContentLoaded', () => { if (document.getElementById('starRating')) setRating(5); });
+
+// BOOT
+checkSession();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.3/supabase.min.js"></script>
+<style>
+  :root {
+    --gold: #D4A843;
+    --gold-light: #F0D68A;
+    --gold-glow: rgba(212,168,67,0.4);
+    --green-deep: #0a2e1a;
+    --green-dark: #0d3b22;
+    --green-mid: #1a6b3a;
+    --green-bright: #2ecc71;
+    --green-neon: #00ff88;
+    --green-glow: rgba(0,255,136,0.15);
+    --bg: #050e08;
+    --bg-card: rgba(10,46,26,0.5);
+    --bg-elevated: rgba(13,59,34,0.6);
+    --border: rgba(212,168,67,0.15);
+    --border-green: rgba(0,255,136,0.1);
+    --text: #e8f0eb;
+    --text-dim: #7a9a87;
+    --gradient-gold: linear-gradient(135deg, #D4A843, #F0D68A, #D4A843);
+    --gradient-green: linear-gradient(135deg, #0d3b22, #1a6b3a);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========= GALAXY BACKGROUND ========= */
+  .galaxy-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(0,255,136,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(212,168,67,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(0,80,40,0.08) 0%, transparent 70%);
+  }
+
+  /* Stars */
+  .stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle var(--dur) ease-in-out infinite;
+    opacity: 0;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: var(--max-opacity); }
+  }
+
+  /* Nebula blobs */
+  .nebula {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .nebula-1 {
+    width: 600px; height: 600px;
+    top: -10%; left: -5%;
+    background: rgba(0,100,50,0.12);
+    animation: nebulaDrift 20s ease-in-out infinite;
+  }
+  .nebula-2 {
+    width: 500px; height: 500px;
+    bottom: 10%; right: -5%;
+    background: rgba(212,168,67,0.06);
+    animation: nebulaDrift 25s ease-in-out infinite reverse;
+  }
+  .nebula-3 {
+    width: 400px; height: 400px;
+    top: 40%; left: 50%;
+    background: rgba(0,180,80,0.05);
+    animation: nebulaDrift 18s ease-in-out infinite 5s;
+  }
+
+  @keyframes nebulaDrift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -20px) scale(1.05); }
+    66% { transform: translate(-20px, 30px) scale(0.95); }
+  }
+
+  /* ========= NAV ========= */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    padding: 0.8rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(30px);
+    background: rgba(5,14,8,0.85);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-transform: uppercase;
+  }
+
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
+  }
+  .nav-links a:hover { color: var(--green-neon); text-shadow: 0 0 10px rgba(0,255,136,0.3); }
+
+  .nav-auth {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+  }
+
+  .btn-login {
+    color: var(--gold) !important;
+    border: 1px solid rgba(212,168,67,0.3);
+    padding: 0.45rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .btn-login:hover { background: rgba(212,168,67,0.1); border-color: var(--gold); }
+
+  .btn-signup-nav {
+    background: var(--gradient-gold);
+    color: var(--bg) !important;
+    -webkit-text-fill-color: var(--bg) !important;
+    padding: 0.45rem 1rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-family: 'Rajdhani', sans-serif;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-signup-nav:hover { box-shadow: 0 0 20px var(--gold-glow); transform: translateY(-1px); }
+
+  /* ========= HERO ========= */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8rem 2rem 4rem;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .hero-logo {
+    width: min(320px, 70vw);
+    margin: 0 auto 2rem;
+    animation: floatLogo 6s ease-in-out infinite;
+    filter: drop-shadow(0 0 40px rgba(212,168,67,0.2)) drop-shadow(0 0 80px rgba(0,255,136,0.1));
+  }
+
+  @keyframes floatLogo {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .hero h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .hero h1 .gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero h1 .neon {
+    color: var(--green-neon);
+    text-shadow: 0 0 20px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.2);
+  }
+
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    max-width: 550px;
+    margin: 0 auto 1.5rem;
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  /* Email capture bar */
+  .email-capture {
+    display: flex;
+    max-width: 500px;
+    margin: 0 auto 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: rgba(10,46,26,0.4);
+    backdrop-filter: blur(10px);
+    transition: border-color 0.3s;
+  }
+  .email-capture:focus-within { border-color: var(--gold); box-shadow: 0 0 20px rgba(212,168,67,0.15); }
+
+  .email-capture input {
+    flex: 1;
+    padding: 1rem 1.2rem;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none;
+  }
+  .email-capture input::placeholder { color: var(--text-dim); }
+
+  .email-capture button {
+    padding: 1rem 1.8rem;
+    background: var(--gradient-gold);
+    border: none;
+    color: var(--bg);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .email-capture button:hover { box-shadow: 0 0 20px var(--gold-glow); }
+
+  .hero-or {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: transparent;
+    color: var(--green-neon);
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
+    transition: all 0.3s;
+    border: 1px solid rgba(0,255,136,0.3);
+  }
+  .btn-primary:hover {
+    background: rgba(0,255,136,0.08);
+    border-color: var(--green-neon);
+    box-shadow: 0 0 25px rgba(0,255,136,0.15);
+    transform: translateY(-2px);
+  }
+
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--gradient-gold);
+    color: var(--bg);
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-gold:hover { box-shadow: 0 0 30px var(--gold-glow); transform: translateY(-2px); }
+
+  /* ========= TICKER ========= */
+  .ticker-wrap {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,14,8,0.8);
+    backdrop-filter: blur(10px);
+    padding: 0.8rem 0;
+  }
+
+  .ticker {
+    display: flex;
+    gap: 3rem;
+    animation: scroll 35s linear infinite;
+    white-space: nowrap;
+  }
+
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .ticker-item .sport { color: var(--text-dim); text-transform: uppercase; font-size: 0.65rem; letter-spacing: 1px; }
+  .ticker-item .roi { color: var(--green-neon); font-weight: 700; text-shadow: 0 0 8px rgba(0,255,136,0.3); }
+  .ticker-item .match { color: var(--text); }
+
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ========= SECTIONS ========= */
+  section { position: relative; z-index: 1; padding: 6rem 2rem; }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--green-neon);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 0.8rem;
+    text-shadow: 0 0 10px rgba(0,255,136,0.3);
+  }
+
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .section-sub {
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    max-width: 600px;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  /* ========= STATS ========= */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.2rem;
+    margin-top: 3rem;
+  }
+
+  .stat {
+    text-align: center;
+    padding: 1.8rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    transition: all 0.4s;
+  }
+  .stat:hover { border-color: var(--gold); box-shadow: 0 0 25px rgba(212,168,67,0.1); }
+
+  .stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.3rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* ========= STEPS ========= */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.4s;
+    position: relative;
+    overflow: hidden;
+  }
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green-neon), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .step:hover { border-color: rgba(0,255,136,0.3); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+  .step:hover::before { opacity: 1; }
+
+  .step-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--green-neon);
+    letter-spacing: 3px;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 8px rgba(0,255,136,0.3);
+  }
+
+  .step-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+
+  .step h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .step p { color: var(--text-dim); font-size: 0.95rem; line-height: 1.6; }
+
+  /* ========= ARB PREVIEW ========= */
+  .arb-preview {
+    margin-top: 3rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .arb-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .arb-header-left { display: flex; align-items: center; gap: 0.7rem; }
+
+  .arb-dot {
+    width: 8px; height: 8px;
+    background: var(--green-neon);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 8px rgba(0,255,136,0.5);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.5); }
+  }
+
+  .arb-header-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .arb-header-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    font-weight: 700;
+  }
+
+  .arb-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 80px;
+    align-items: center;
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    font-size: 0.88rem;
+    transition: background 0.2s;
+  }
+  .arb-row:hover { background: rgba(0,255,136,0.03); }
+
+  .arb-sport {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  .arb-match { font-weight: 600; }
+  .arb-market { color: var(--text-dim); font-weight: 400; font-size: 0.82rem; }
+  .arb-roi {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--green-neon);
+    text-align: right;
+    text-shadow: 0 0 8px rgba(0,255,136,0.3);
+  }
+
+  .arb-blur { position: relative; }
+  .arb-blur .arb-row { filter: blur(5px); user-select: none; }
+  .arb-blur-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    background: rgba(5,14,8,0.7);
+    backdrop-filter: blur(3px);
+    z-index: 2;
+  }
+  .arb-blur-overlay p {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ========= PREMIUM SECTION ========= */
+  .premium-section {
+    background: linear-gradient(180deg, rgba(10,46,26,0.3) 0%, rgba(5,14,8,0.5) 100%);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .pricing-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    backdrop-filter: blur(10px);
+    position: relative;
+    transition: all 0.4s;
+  }
+  .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+
+  .pricing-card.featured {
+    border-color: var(--gold);
+    box-shadow: 0 0 40px rgba(212,168,67,0.08), inset 0 0 40px rgba(212,168,67,0.02);
+  }
+  .pricing-card.featured::before {
+    content: 'MOST POPULAR';
+    position: absolute;
+    top: -12px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--gradient-gold);
+    color: var(--bg);
+    padding: 0.3rem 1.2rem;
+    border-radius: 100px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .plan-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 0.5rem;
+  }
+
+  .plan-price {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 0.3rem;
+  }
+  .plan-price span { font-size: 0.9rem; font-weight: 400; color: var(--text-dim); }
+
+  .plan-desc { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  .plan-features { list-style: none; margin-bottom: 2rem; }
+  .plan-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .plan-features li:last-child { border-bottom: none; }
+  .plan-features .check { color: var(--green-neon); font-weight: 700; text-shadow: 0 0 6px rgba(0,255,136,0.3); }
+
+  .btn-plan {
+    display: block;
+    width: 100%;
+    padding: 0.9rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .btn-plan:hover { border-color: var(--green-neon); color: var(--green-neon); }
+
+  .btn-plan.gold {
+    background: var(--gradient-gold);
+    color: var(--bg);
+    border: none;
+  }
+  .btn-plan.gold:hover { box-shadow: 0 0 25px var(--gold-glow); }
+
+  /* ========= REVIEWS ========= */
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .review-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+  }
+  .review-card:hover { border-color: rgba(0,255,136,0.2); }
+
+  .review-stars { color: var(--gold); font-size: 1rem; margin-bottom: 0.8rem; letter-spacing: 2px; }
+
+  .review-text {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 1rem;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .review-author { font-weight: 700; color: var(--gold); font-size: 0.9rem; }
+  .review-date { font-size: 0.8rem; color: var(--text-dim); }
+
+  /* Write review form */
+  .review-form {
+    margin-top: 2.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .review-form h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .form-row { margin-bottom: 1rem; }
+  .form-row label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: rgba(5,14,8,0.6);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.3s;
+    resize: vertical;
+  }
+  .form-input:focus { border-color: var(--green-neon); box-shadow: 0 0 10px rgba(0,255,136,0.1); }
+  .form-input::placeholder { color: var(--text-dim); }
+
+  .star-rating { display: flex; gap: 0.3rem; margin-bottom: 0.5rem; }
+  .star-rating span {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--border);
+    transition: all 0.2s;
+  }
+  .star-rating span.active,
+  .star-rating span:hover { color: var(--gold); text-shadow: 0 0 8px var(--gold-glow); }
+
+  /* ========= AUTH MODALS ========= */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(5,14,8,0.9);
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 60px rgba(0,0,0,0.5), 0 0 30px rgba(212,168,67,0.05);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1.2rem;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal .subtitle {
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+
+  .modal .form-row { margin-bottom: 1.2rem; }
+
+  .modal .btn-gold {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .modal-switch {
+    text-align: center;
+    margin-top: 1.2rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+  .modal-switch a {
+    color: var(--green-neon);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .modal-switch a:hover { text-shadow: 0 0 8px rgba(0,255,136,0.3); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .social-login {
+    display: flex;
+    gap: 0.8rem;
+  }
+  .social-btn {
+    flex: 1;
+    padding: 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  .social-btn:hover { border-color: var(--gold); background: rgba(212,168,67,0.05); }
+
+  /* ========= FAQ ========= */
+  .faq-list { margin-top: 3rem; max-width: 700px; }
+  .faq-item { border-bottom: 1px solid var(--border); padding: 1.3rem 0; }
+
+  .faq-q {
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .faq-q:hover { color: var(--green-neon); }
+  .faq-q .arrow { transition: transform 0.3s; font-size: 1.2rem; color: var(--text-dim); }
+  .faq-item.open .arrow { transform: rotate(45deg); color: var(--green-neon); }
+
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  .faq-item.open .faq-a { max-height: 200px; padding-top: 1rem; }
+
+  /* ========= FINAL CTA ========= */
+  .final-cta {
+    text-align: center;
+    padding: 8rem 2rem;
+    position: relative;
+  }
+
+  .final-cta h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .final-cta p { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 2.5rem; }
+
+  /* ========= FOOTER ========= */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  footer a { color: var(--gold); text-decoration: none; }
+
+  /* ========= ANIMATIONS ========= */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ========= SUCCESS NOTIFICATION ========= */
+  .notification {
+    display: none;
+    position: fixed;
+    top: 5rem; right: 2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--green-neon);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    z-index: 3000;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 20px rgba(0,255,136,0.15);
+    animation: slideIn 0.5s ease;
+    max-width: 350px;
+  }
+  .notification.active { display: flex; align-items: center; gap: 0.8rem; }
+  .notification .notif-icon { font-size: 1.3rem; }
+  .notification .notif-text { font-size: 0.9rem; font-weight: 600; }
+
+  @keyframes slideIn {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* ========= MOBILE ========= */
+  @media (max-width: 768px) {
+    nav { padding: 0.7rem 1rem; }
+    .nav-links { display: none; }
+    .nav-auth { gap: 0.5rem; }
+    .hero { padding: 7rem 1.5rem 3rem; }
+    .hero-logo { width: min(260px, 80vw); }
+    section { padding: 4rem 1.5rem; }
+    .arb-row { grid-template-columns: 60px 1fr 70px; }
+    .arb-market { display: none; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .email-capture { flex-direction: column; }
+    .email-capture button { padding: 0.9rem; }
+    .hero-buttons { flex-direction: column; align-items: center; }
+    .btn-primary, .btn-gold { width: 100%; justify-content: center; }
+    .modal { padding: 2rem 1.5rem; }
+    .social-login { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- GALAXY BG -->
+<div class="galaxy-bg"></div>
+<div class="stars" id="stars"></div>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification">
+  <span class="notif-icon">✅</span>
+  <span class="notif-text" id="notif-text">Account created successfully!</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Arbonomics</div>
+  <div class="nav-links">
+    <a href="#how">How It Works</a>
+    <a href="#premium">Premium</a>
+    <a href="#reviews">Reviews</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <div class="nav-auth" id="navGuest">
+    <button class="btn-login" onclick="openModal('login')">Log In</button>
+    <button class="btn-signup-nav" onclick="openModal('signup')">Sign Up</button>
+  </div>
+  <div class="nav-user" id="navUser">
+    <span class="nav-user-email" id="navUserEmail"></span>
+    <button class="btn-logout" onclick="handleLogout()">Log Out</button>
+  </div>
+</nav>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('login')">&times;</button>
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Log in to your Arbonomics dashboard</p>
+    <div class="form-row">
+      <label>Email</label>
+      <input type="email" class="form-input" placeholder="you@email.com">
+    </div>
+    <div class="form-row">
+      <label>Password</label>
+      <input type="password" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="form-error" id="loginError"></div>
+    <button class="btn-gold" id="loginBtn" onclick="handleLogin()" style="width:100%;justify-content:center;">Log In</button>
+    <div class="divider">or</div>
+    <div class="social-login">
+      <button class="social-btn">Google</button>
+      <button class="social-btn">Telegram</button>
+    </div>
+    <div class="modal-switch">
+      Don't have an account? <a onclick="switchModal('signup')">Sign up</a>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP MODAL -->
+<div class="modal-overlay" id="signupModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('signup')">&times;</button>
+    <h2>Create Account</h2>
+    <p class="subtitle">Join the school of arbitrage</p>
+    <div class="form-row">
+      <label>Email</label>
+      <input type="email" class="form-input" placeholder="you@email.com" id="signupEmail">
+    </div>
+    <div class="form-row">
+      <label>Username</label>
+      <input type="text" class="form-input" placeholder="Choose a username">
+    </div>
+    <div class="form-row">
+      <label>Password</label>
+      <input type="password" class="form-input" placeholder="Min. 8 characters">
+    </div>
+    <div class="form-row">
+      <label>Confirm Password</label>
+      <input type="password" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="form-error" id="signupError"></div>
+    <button class="btn-gold" id="signupBtn" onclick="handleSignup()" style="width:100%;justify-content:center;">Create Account</button>
+    <div class="divider">or</div>
+    <div class="social-login">
+      <button class="social-btn">Google</button>
+      <button class="social-btn">Telegram</button>
+    </div>
+    <div class="modal-switch">
+      Already have an account? <a onclick="switchModal('login')">Log in</a>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <img src="logo.png" alt="Arbonomics" class="hero-logo">
+    <h1>The School of<br><span class="neon">Arbitrage</span></h1>
+    <p class="hero-sub">Real-time arbitrage alerts powered by the Odyssey engine. Join a growing community making guaranteed profit from bookmaker inefficiencies.</p>
+
+    <div class="email-capture" id="heroEmail">
+      <input type="email" placeholder="Enter your email to get started..." id="heroEmailInput">
+      <button onclick="handleHeroEmail()">Get Started</button>
+    </div>
+
+    <div class="hero-or">— or join directly —</div>
+
+    <div class="hero-buttons">
+      <a href="https://t.me/YOUR_TELEGRAM_LINK" class="btn-primary" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.13l-1.97 9.27c-.15.67-.54.83-1.09.52l-3.01-2.22-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.05 5.55-5.01c.24-.21-.05-.33-.37-.13l-6.86 4.32-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1-.05.85.93z"/></svg>
+        Join Telegram — Free
+      </a>
+      <a href="#premium" class="btn-gold">
+        View Premium Plans
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-item"><span class="sport">⚽ EPL</span><span class="match">Arsenal vs Chelsea</span><span class="roi">+3.2%</span></div>
+    <div class="ticker-item"><span class="sport">🏀 NBA</span><span class="match">Lakers vs Celtics</span><span class="roi">+2.8%</span></div>
+    <div class="ticker-item"><span class="sport">🎾 ATP</span><span class="match">Djokovic vs Sinner</span><span class="roi">+4.1%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ Liga</span><span class="match">Real Madrid vs Barça</span><span class="roi">+2.5%</span></div>
+    <div class="ticker-item"><span class="sport">🏈 NFL</span><span class="match">Chiefs vs Eagles</span><span class="roi">+3.7%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ BL</span><span class="match">Bayern vs Dortmund</span><span class="roi">+2.1%</span></div>
+    <div class="ticker-item"><span class="sport">🏀 NBA</span><span class="match">Nuggets vs Bucks</span><span class="roi">+3.5%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ EPL</span><span class="match">City vs Liverpool</span><span class="roi">+4.4%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ EPL</span><span class="match">Arsenal vs Chelsea</span><span class="roi">+3.2%</span></div>
+    <div class="ticker-item"><span class="sport">🏀 NBA</span><span class="match">Lakers vs Celtics</span><span class="roi">+2.8%</span></div>
+    <div class="ticker-item"><span class="sport">🎾 ATP</span><span class="match">Djokovic vs Sinner</span><span class="roi">+4.1%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ Liga</span><span class="match">Real Madrid vs Barça</span><span class="roi">+2.5%</span></div>
+    <div class="ticker-item"><span class="sport">🏈 NFL</span><span class="match">Chiefs vs Eagles</span><span class="roi">+3.7%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ BL</span><span class="match">Bayern vs Dortmund</span><span class="roi">+2.1%</span></div>
+    <div class="ticker-item"><span class="sport">🏀 NBA</span><span class="match">Nuggets vs Bucks</span><span class="roi">+3.5%</span></div>
+    <div class="ticker-item"><span class="sport">⚽ EPL</span><span class="match">City vs Liverpool</span><span class="roi">+4.4%</span></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<section class="container fade-in">
+  <div class="stats">
+    <div class="stat"><div class="stat-value">130+</div><div class="stat-label">Members</div></div>
+    <div class="stat"><div class="stat-value">50+</div><div class="stat-label">Daily Arbs</div></div>
+    <div class="stat"><div class="stat-value">30</div><div class="stat-label">Bookmakers</div></div>
+    <div class="stat"><div class="stat-value">24/7</div><div class="stat-label">Odyssey Bot</div></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="container fade-in">
+  <div class="section-label">/// How It Works</div>
+  <div class="section-title">Three steps to<br>guaranteed profit</div>
+  <div class="section-sub">Arbitrage betting exploits price differences between bookmakers. When odds don't agree, you profit regardless of outcome.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-icon">📡</div>
+      <div class="step-number">// Step 01</div>
+      <h3>Odyssey Scans</h3>
+      <p>Our Odyssey V37 engine monitors odds across 30 bookmakers in real-time, scanning for profitable discrepancies around the clock.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon">⚡</div>
+      <div class="step-number">// Step 02</div>
+      <h3>Instant Alert</h3>
+      <p>Receive Telegram alerts with exact bets, stakes, and bookmakers. Everything pre-calculated — just place the bets.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon">💰</div>
+      <div class="step-number">// Step 03</div>
+      <h3>Lock Profit</h3>
+      <p>Both sides covered. No matter who wins, you profit. Typical returns range from 1-5% per arb, risk-free.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE PREVIEW -->
+<section class="container fade-in">
+  <div class="section-label">/// Live Feed</div>
+  <div class="section-title">See what's running now</div>
+  <div class="section-sub">Real opportunities from Odyssey, flowing right now.</div>
+
+  <div class="arb-preview">
+    <div class="arb-header">
+      <div class="arb-header-left">
+        <div class="arb-dot"></div>
+        <span class="arb-header-title">Odyssey Live Feed</span>
+      </div>
+      <span class="arb-header-badge">V37 ACTIVE</span>
+    </div>
+    <div class="arb-row">
+      <span class="arb-sport">⚽ EPL</span>
+      <span class="arb-match">Arsenal vs Man Utd</span>
+      <span class="arb-market">Match Result — Bet365 / Pinnacle</span>
+      <span class="arb-roi">+3.4%</span>
+    </div>
+    <div class="arb-row">
+      <span class="arb-sport">🏀 NBA</span>
+      <span class="arb-match">Knicks vs Heat</span>
+      <span class="arb-market">Over/Under 215.5 — William Hill / Betfair</span>
+      <span class="arb-roi">+2.7%</span>
+    </div>
+    <div class="arb-row">
+      <span class="arb-sport">🎾 ATP</span>
+      <span class="arb-match">Alcaraz vs Medvedev</span>
+      <span class="arb-market">Match Winner — Betway / Smarkets</span>
+      <span class="arb-roi">+4.1%</span>
+    </div>
+    <div class="arb-blur">
+      <div class="arb-row">
+        <span class="arb-sport">⚽ BL</span>
+        <span class="arb-match">Bayern vs Dortmund</span>
+        <span class="arb-market">BTTS — 1xBet / Betfair</span>
+        <span class="arb-roi">+5.2%</span>
+      </div>
+      <div class="arb-row">
+        <span class="arb-sport">🏈 NFL</span>
+        <span class="arb-match">Bills vs Ravens</span>
+        <span class="arb-market">Spread -3.5 — DraftKings / FanDuel</span>
+        <span class="arb-roi">+3.8%</span>
+      </div>
+      <div class="arb-row">
+        <span class="arb-sport">⚽ EPL</span>
+        <span class="arb-match">Liverpool vs Spurs</span>
+        <span class="arb-market">BTTS — Bet365 / Paddy Power</span>
+        <span class="arb-roi">+6.1%</span>
+      </div>
+      <div class="arb-blur-overlay">
+        <p>🔒 Unlock full feed</p>
+        <button class="btn-gold" onclick="openModal('signup')" style="font-size:0.85rem; padding:0.7rem 1.5rem;">Sign Up Free</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PREMIUM -->
+<section id="premium" class="premium-section fade-in">
+  <div class="container">
+    <div class="section-label">/// Premium</div>
+    <div class="section-title">Custom filtered arbs.<br>Your rules.</div>
+    <div class="section-sub">Get a personal Odyssey feed tailored to your bookmakers, sports, and ROI thresholds.</div>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="plan-name">Community</div>
+        <div class="plan-price">Free</div>
+        <div class="plan-desc">Get started with arbing</div>
+        <ul class="plan-features">
+          <li><span class="check">✦</span> Telegram group access</li>
+          <li><span class="check">✦</span> General arb alerts</li>
+          <li><span class="check">✦</span> Community chat</li>
+          <li><span class="check">✦</span> Education resources</li>
+          <li><span class="check">✦</span> Arb calculator</li>
+        </ul>
+        <a href="https://t.me/YOUR_TELEGRAM_LINK" class="btn-plan" target="_blank">Join Free</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">£XX <span>/ month</span></div>
+        <div class="plan-desc">Filtered & personalised</div>
+        <ul class="plan-features">
+          <li><span class="check">✦</span> Everything in Community</li>
+          <li><span class="check">✦</span> Custom sport filters</li>
+          <li><span class="check">✦</span> ROI thresholds</li>
+          <li><span class="check">✦</span> Bookmaker-specific alerts</li>
+          <li><span class="check">✦</span> Priority speed</li>
+          <li><span class="check">✦</span> In-play arbs</li>
+        </ul>
+        <button class="btn-plan gold" onclick="openModal('signup')">Get Pro Access</button>
+      </div>
+
+      <div class="pricing-card">
+        <div class="plan-name">Elite</div>
+        <div class="plan-price">£XX <span>/ month</span></div>
+        <div class="plan-desc">Full platform + dashboard</div>
+        <ul class="plan-features">
+          <li><span class="check">✦</span> Everything in Pro</li>
+          <li><span class="check">✦</span> Web dashboard</li>
+          <li><span class="check">✦</span> Profit tracking</li>
+          <li><span class="check">✦</span> API access</li>
+          <li><span class="check">✦</span> 1-on-1 coaching</li>
+          <li><span class="check">✦</span> Early feature access</li>
+        </ul>
+        <button class="btn-plan" onclick="openModal('signup')">Get Elite Access</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews" class="container fade-in">
+  <div class="section-label">/// Reviews</div>
+  <div class="section-title">From the community</div>
+  <div class="section-sub">Hear from members making real profit with Arbonomics.</div>
+
+  <div class="reviews-grid" id="reviewsGrid">
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"Made my first arb profit within 20 minutes of joining. The alerts are fast and the community is genuinely helpful."</div>
+      <div class="review-author">@member1</div>
+      <div class="review-date">2 weeks ago</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"Odyssey catches arbs I'd never find manually. The Pro filter means I only see opportunities on my bookmakers."</div>
+      <div class="review-author">@member2</div>
+      <div class="review-date">1 week ago</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"Best arb community out there. No fluff, no tipster garbage — pure mathematical edge. Odyssey is elite."</div>
+      <div class="review-author">@member3</div>
+      <div class="review-date">3 days ago</div>
+    </div>
+  </div>
+
+  <!-- Write Review -->
+  <div class="review-form">
+    <h3>✍️ Write a Review</h3>
+    <div class="form-row">
+      <label>Your Rating</label>
+      <div class="star-rating" id="starRating">
+        <span onclick="setRating(1)">★</span>
+        <span onclick="setRating(2)">★</span>
+        <span onclick="setRating(3)">★</span>
+        <span onclick="setRating(4)">★</span>
+        <span onclick="setRating(5)">★</span>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Display Name</label>
+      <input type="text" class="form-input" placeholder="@yourusername" id="reviewName">
+    </div>
+    <div class="form-row">
+      <label>Your Review</label>
+      <textarea class="form-input" rows="3" placeholder="Share your experience with Arbonomics..." id="reviewText"></textarea>
+    </div>
+    <div class="form-error" id="reviewError"></div>
+    <button class="btn-gold" id="reviewBtn" onclick="submitReview()" style="width:100%; justify-content:center; margin-top:0.5rem;">Submit Review</button>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="container fade-in">
+  <div class="section-label">/// FAQ</div>
+  <div class="section-title">Common Questions</div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What is arbitrage betting?<span class="arrow">+</span></div>
+      <div class="faq-a">Arbitrage betting is a strategy where you place bets on all possible outcomes across different bookmakers, exploiting odds discrepancies to guarantee profit regardless of result. It's mathematics, not gambling.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Is this legal?<span class="arrow">+</span></div>
+      <div class="faq-a">Yes, completely legal. You're placing bets at the best available odds. Some bookmakers may limit heavy arbers — our community helps you navigate account longevity strategies.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How much can I make?<span class="arrow">+</span></div>
+      <div class="faq-a">Returns depend on your bankroll and activity. Individual arbs return 1-5% profit. Active members following alerts consistently see steady daily returns. It's not get-rich-quick — it's guaranteed, steady profit.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What's the difference between free and premium?<span class="arrow">+</span></div>
+      <div class="faq-a">The free Telegram gives general arb alerts and community access. Premium gives you a custom Odyssey feed — choose your sports, bookmakers, and minimum ROI threshold so you only see arbs relevant to you.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Do I need a big bankroll?<span class="arrow">+</span></div>
+      <div class="faq-a">No. Start with as little as £50-100 across a couple of bookmakers. The percentage return is the same regardless of stake size.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta fade-in">
+  <h2>Stop gambling.<br>Start <span style="background:var(--gradient-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">profiting.</span></h2>
+  <p>Join 130+ members locking in guaranteed returns every day.</p>
+  <div class="email-capture" style="max-width:500px;margin:0 auto 1.5rem;">
+    <input type="email" placeholder="Enter your email..." id="finalEmailInput">
+    <button onclick="handleFinalEmail()">Join Now</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;background:var(--gradient-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:3px;">ARBONOMICS</p>
+  <p style="margin-top:0.5rem;">The School of Arbitrage — © 2025</p>
+  <p style="margin-top:0.3rem;"><a href="/cdn-cgi/l/email-protection#265f49535466434b474f4a0845494b">Contact</a> · <a href="#">Terms</a> · <a href="#">Privacy</a></p>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // ========= STARS =========
+  const starsContainer = document.getElementById('stars');
+  for (let i = 0; i < 200; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.setProperty('--dur', (2 + Math.random() * 5) + 's');
+    star.style.setProperty('--max-opacity', (0.3 + Math.random() * 0.7));
+    star.style.animationDelay = Math.random() * 5 + 's';
+    star.style.width = star.style.height = (1 + Math.random() * 2) + 'px';
+    starsContainer.appendChild(star);
+  }
+
+  // ========= SCROLL ANIMATIONS =========
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // ========= MODALS =========
+  function openModal(type) {
+    closeModal('login'); closeModal('signup');
+    document.getElementById(type + 'Modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(type) {
+    document.getElementById(type + 'Modal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function switchModal(to) {
+    closeModal(to === 'signup' ? 'login' : 'signup');
+    openModal(to);
+  }
+
+  // Close on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+
+  // ========= AUTH HANDLER (placeholder) =========
+  function handleAuth(type) {
+    showNotif(type === 'signup' ? '✅ Account created! Check your email.' : '✅ Logged in successfully!');
+    closeModal(type);
+  }
+
+  // ========= EMAIL CAPTURE =========
+  function handleHeroEmail() {
+    const email = document.getElementById('heroEmailInput').value;
+    if (email && email.includes('@')) {
+      document.getElementById('signupEmail').value = email;
+      openModal('signup');
+    }
+  }
+
+  function handleFinalEmail() {
+    const email = document.getElementById('finalEmailInput').value;
+    if (email && email.includes('@')) {
+      document.getElementById('signupEmail').value = email;
+      openModal('signup');
+    }
+  }
+
+  // ========= REVIEWS =========
+  let currentRating = 5;
+
+  function setRating(n) {
+    currentRating = n;
+    document.querySelectorAll('#starRating span').forEach((s, i) => {
+      s.classList.toggle('active', i < n);
+    });
+  }
+  setRating(5);
+
+  function submitReview() {
+    const name = document.getElementById('reviewName').value || '@anonymous';
+    const text = document.getElementById('reviewText').value;
+    if (!text) return;
+
+    const card = document.createElement('div');
+    card.className = 'review-card';
+    card.style.animation = 'fadeInUp 0.5s ease';
+    card.innerHTML = `
+      <div class="review-stars">${'★'.repeat(currentRating)}${'☆'.repeat(5 - currentRating)}</div>
+      <div class="review-text">"${text}"</div>
+      <div class="review-author">${name}</div>
+      <div class="review-date">Just now</div>
+    `;
+
+    document.getElementById('reviewsGrid').prepend(card);
+    document.getElementById('reviewName').value = '';
+    document.getElementById('reviewText').value = '';
+    setRating(5);
+    showNotif('⭐ Review submitted! Thanks for the feedback.');
+  }
+
+  // ========= NOTIFICATION =========
+  function showNotif(msg) {
+    const n = document.getElementById('notification');
+    document.getElementById('notif-text').textContent = msg;
+    n.classList.add('active');
+    setTimeout(() => n.classList.remove('active'), 3500);
+  }
+
+  // ========= SMOOTH SCROLL =========
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const t = document.queryS
